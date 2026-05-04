@@ -216,3 +216,9 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ABIDE neuroimaging data
+abide_data/
+*.1D
+*.nii
+*.nii.gz
