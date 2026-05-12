@@ -53,6 +53,7 @@ def load_subject(subject_id, data_dir, pheno_df):
 
 
 # Usage
+"""
 pheno_df = pd.read_csv('Phenotypic_V1_0b_preprocessed1.csv')
 data_dir = './abide_data/Outputs/cpac/filt_global/rois_cc200'
 
@@ -67,3 +68,4 @@ print(f"Subject:    {sid}")
 print(f"Site:       {site}")
 print(f"Diagnosis:  {'ASD' if y == 1 else 'TDC'}")
 print(f"X_time shape: {X_time.shape}")   # should be (200, timepoints)
+"""
