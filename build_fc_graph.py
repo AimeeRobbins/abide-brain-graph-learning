@@ -27,6 +27,9 @@ class FCGraphBuilder:
         """
         # Use pearson correlation for fc graph
         fc = np.corrcoef(x_time)
+
+        fc = np.nan_to_num(fc, nan=0.0)
+        
         # Clip numerical noise outside [-1,1]
         fc = np.clip(fc, -1, 1)
         return fc
@@ -50,7 +53,7 @@ class FCGraphBuilder:
             return fc
 
     def add_self_loops(self, adj):
-        if(self.add_self_loops):
+        if(self.self_loops):
             np.fill_diagonal(adj, 1.0)
         return adj
 

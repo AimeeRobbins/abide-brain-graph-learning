@@ -11,10 +11,10 @@ class AbideDataLoader:
         pheno_df : pd.DataFrame
             The phenotypic dataframe
         """
-        self.data_dir = data_dir
         self.pheno_df = pheno_df
+        self.data_dir = data_dir
 
-    def load_subject(self, subject_id):
+    def load_subject(self, file_name):
         """
         Load data for a single ABIDE subject.
         
@@ -37,13 +37,14 @@ class AbideDataLoader:
         """
 
         # Load ROI time series
-        file_name = os.path.join(self.data_dir, f"{subject_id}_rois_cc200.1D")
+        path = os.path.join(self.data_dir, file_name)
+        subject_id = file_name.split("_rois")[0]
 
-        if not os.path.exists(file_name):
+        if not os.path.exists(path):
             raise FileNotFoundError(f"No .1D file found for subject: {subject_id}")
 
         # Load ROI time series matrix and transpose so (200, timepoints)
-        X_time = np.loadtxt(file_name).T
+        X_time = np.loadtxt(path).T
 
         # Get Phenotypic Data
         row = self.pheno_df[self.pheno_df['FILE_ID'] == subject_id]

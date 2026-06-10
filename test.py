@@ -9,7 +9,7 @@ data_dir = './abide_data/Outputs/cpac/filt_global/rois_cc200'
 data_loader = AbideDataLoader(pheno_df=pheno_df, data_dir=data_dir)
 
 # Load a single subject
-X_time, y, site, sid = data_loader.load_subject('Pitt_0050030')
+X_time, y, site, sid = data_loader.load_subject('./abide_data/Outputs/cpac/filt_global/rois_cc200/Pitt_0050030')
 
 print(f"Subject:    {sid}")
 print(f"Site:       {site}")
