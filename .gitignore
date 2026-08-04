@@ -225,4 +225,5 @@ abide_data/
 
 # FC Grpah outputs
 fc_graphs/
+ec_graphs/
 *.npy

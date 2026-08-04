@@ -17,23 +17,14 @@ class AbideDataLoader:
     def load_subject(self, file_name):
         """
         Load data for a single ABIDE subject.
-        
-        Parameters
-        ----------
-        subject_id : str
-            The FILE_ID of the subject (e.g. 'Caltech_00501456')
-        
+        file_name : str e.g. 'Caltech_0051456_rois_cc200.1D')
         
         Returns
-        -------
-        X_time : np.ndarray, shape (200, timepoints)
-            ROI time series matrix
-        y : int
-            1 = ASD, 0 = TDC (typical control)
-        site : str
-            Scanning site (e.g. 'NYU', 'Caltech')
-        subject_id : str
-            The subject FILE_ID
+        X_time : np.ndarray ROI time series matrix with shape (200, timepoints)
+            
+        y : int; 1 = ASD, 0 = TDC (typical control)
+        site : Scanning site (e.g. 'NYU', 'Caltech')
+        subject_id : The subject FILE_ID
         """
 
         # Load ROI time series

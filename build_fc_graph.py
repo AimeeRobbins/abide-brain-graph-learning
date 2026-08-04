@@ -32,6 +32,10 @@ class FCGraphBuilder:
         
         # Clip numerical noise outside [-1,1]
         fc = np.clip(fc, -1, 1)
+
+        print(fc[:10, :10])
+        print(fc.max())
+
         return fc
 
     def sparsify_fc(self, fc):
