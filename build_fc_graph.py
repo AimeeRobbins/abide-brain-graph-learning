@@ -29,14 +29,15 @@ class FCGraphBuilder:
         fc = np.corrcoef(x_time)
 
         fc = np.nan_to_num(fc, nan=0.0)
-        
+
         # Clip numerical noise outside [-1,1]
         fc = np.clip(fc, -1, 1)
 
-        print(fc[:10, :10])
-        print(fc.max())
-
         return fc
+
+    def get_node_features(self, x_time):
+        """Fast method to obtain just the raw FC graph, no sparsify/normalize/self-loop work."""
+        return self.compute_fc(x_time)
 
     def sparsify_fc(self, fc):
         if(self.sparsify):
@@ -59,6 +60,8 @@ class FCGraphBuilder:
     def add_self_loops(self, adj):
         if(self.self_loops):
             np.fill_diagonal(adj, 1.0)
+        else:
+            np.fill_diagonal(adj, 0.0)
         return adj
 
     def normalise_fc(self, adj):
@@ -89,7 +92,8 @@ class FCGraphBuilder:
         adj = self.sparsify_fc(fc)
         adj = self.add_self_loops(adj)
         adj = self.normalise_fc(adj)
-        return adj
+        stats_dict = self.graph_stats(adj)
+        return adj, stats_dict
        
     def graph_stats(self, adj):
         n_edges = np.sum(adj != 0)

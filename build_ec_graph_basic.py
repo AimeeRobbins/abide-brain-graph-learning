@@ -3,12 +3,12 @@ import pandas as pd
 import os
 #from scipy import stats
 
-class ECGraphBuilder:
+class ECGraphBuilder_basic:
     """
     Builder for Effective Connectivity graphs using Pearson correlation and lagged correlation from ROI time series.
     """
 
-    def __init__(self, k=5, sparsify=True, normalise=True, self_loops=True):
+    def __init__(self, k=5, sparsify=True, normalise=True, self_loops=False):
         """
         k: top-k edges per ROI
         sparsify: selects top k edges per row of ROI
@@ -20,23 +20,21 @@ class ECGraphBuilder:
         self.normalise = normalise
         self.self_loops = self_loops
 
-    def corr2_coeff(self, A, B, eps=1e-8):
-        A_mA = A - A.mean(1)[:, None]
-        B_mB = B - B.mean(1)[:, None]
-        ssA = (A_mA**2).sum(1)
-        ssB = (B_mB**2).sum(1)
-        return np.dot(A_mA, B_mB.T) / np.sqrt(np.dot(ssA[:, None], ssB[None]) + eps)
-
     def compute_ec(self, roi_time_series):
         """
         Builds effective connectivity graph using Pearson correlation and lagged correlation from ROI time series.
         roi_time_series: ROI time series matrix with shape (n_rois, timepoints) 
         """
+
+        n_rois = roi_time_series.shape[0]
+        ec = np.zeros((n_rois, n_rois))
         lag = 1
-        x1 = roi_time_series[:, :-lag]
-        x2 = roi_time_series[:, lag:]
-        
-        ec = self.corr2_coeff(x1, x2)
+
+        for i, roi1 in enumerate(roi_time_series):
+            for j, roi2 in enumerate(roi_time_series):
+                # Obtain element [0,1] from the 2x2 matrix after performing the Pearson correlation with the time lag
+                ec[i,j] = np.corrcoef(roi1[:-lag], roi2[lag:])[0,1]
+
         ec = np.nan_to_num(ec, nan=0.0)
         
         # Remove correlation for diagonal
@@ -89,20 +87,6 @@ class ECGraphBuilder:
             adj = adj / row_sum
         return adj
 
-    def graph_stats(self, adj):
-        n_edges = np.sum(adj != 0)
-        density = n_edges / (adj.shape[0] ** 2)
-        weights = adj[adj != 0]
-        abs_weights = np.abs(weights)
-
-        return {
-            "num_nodes": adj.shape[0],
-            "num_edges": int(n_edges),
-            "density": float(density),
-            "mean_weight": float(np.mean(abs_weights)),
-            "std_weight": float(np.std(weights))
-        }
-
     def build_graph(self, roi_time_series):
         """
         Function which is called to fully build the ec graph, returning the adjacency matrix
@@ -121,6 +105,20 @@ class ECGraphBuilder:
         adj = self.normalise_ec(adj)
         stats_dict = self.graph_stats(adj)
         return adj, stats_dict
+       
+    def graph_stats(self, adj):
+        n_edges = np.sum(adj != 0)
+        density = n_edges / (adj.shape[0] ** 2)
+        weights = adj[adj != 0]
+        abs_weights = np.abs(weights)
+
+        return {
+            "num_nodes": adj.shape[0],
+            "num_edges": int(n_edges),
+            "density": float(density),
+            "mean_weight": float(np.mean(abs_weights)),
+            "std_weight": float(np.std(weights))
+        }
 
     def save_graph(self, adj, path="ec_graph.npy"):
         """
