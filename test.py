@@ -10,25 +10,25 @@ data_dir = './abide_data/Outputs/cpac/filt_global/rois_cc200'
 data_loader = AbideDataLoader(data_dir=data_dir, pheno_df=pheno_df)
 
 # Load a single subject
-X_time, y, site, sid = data_loader.load_subject('Caltech_0051456_rois_cc200.1D')
+X_time, y, site, sid = data_loader.load_subject('USM_0050516_rois_cc200.1D')
 
 print(f"Subject:    {sid}")
 print(f"Site:       {site}")
 print(f"Diagnosis:  {'ASD' if y == 1 else 'TDC'}")
 print(f"X_time shape: {X_time.shape}")   # should be (200, timepoints)
 
-#fc_graph = FCGraphBuilder()
-#adj = fc_graph.build_graph(X_time)
-#fc_graph.save_graph(adj)
+fc_graph = FCGraphBuilder()
+adj = fc_graph.get_node_features(X_time)
+fc_graph.save_graph(adj)
 
-ec_graph = ECGraphBuilder()
-adj, stats = ec_graph.build_graph(X_time)
-ec_graph.save_graph(adj)
-print(stats["num_nodes"])
-print(stats["num_edges"])
-print(stats["density"])
-print(stats["mean_weight"])
-print(stats["std_weight"])
+#ec_graph = ECGraphBuilder()
+#adj, stats = ec_graph.build_graph(X_time)
+#ec_graph.save_graph(adj)
+#print(stats["num_nodes"])
+#print(stats["num_edges"])
+#print(stats["density"])
+#print(stats["mean_weight"])
+#print(stats["std_weight"])
 
 plt.figure(figsize=(8, 8))
 plt.imshow(adj, cmap='coolwarm')

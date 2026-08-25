@@ -223,7 +223,9 @@ abide_data/
 *.nii
 *.nii.gz
 
-# FC Grpah outputs
+# Grpah outputs
 fc_graphs/
 ec_graphs/
 *.npy
+
+data/processed
