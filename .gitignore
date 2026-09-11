@@ -228,4 +228,4 @@ fc_graphs/
 ec_graphs/
 *.npy
 
-data/processed
+graphs
