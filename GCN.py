@@ -8,8 +8,8 @@ class GCN(torch.nn.Module):
     def __init__(self):
         super().__init__()
 
-        self.conv1 = GCNConv(2, 4, normalize=False)
-        self.conv2 = GCNConv(4, 4, normalize=False)
+        self.conv1 = GCNConv(200, 16, normalize=False)
+        self.conv2 = GCNConv(16, 4, normalize=False)
 
         self.classifier = torch.nn.Linear(4, 2)
 
