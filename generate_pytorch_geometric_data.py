@@ -40,6 +40,7 @@ def build_subject_graph(roi_time_series, label, site):
 
     return data
 
+# main program to create graphs
 graphs = []
 
 pheno_df = pd.read_csv('Phenotypic_V1_0b_preprocessed1.csv')
@@ -49,11 +50,6 @@ data_loader = AbideDataLoader(data_dir=data_dir, pheno_df=pheno_df)
 # Load several subjects
 for path in os.listdir(data_dir):
     timeseries, label, site, sid = data_loader.load_subject(path)
-
-    #print(f"Subject:    {sid}")
-    #print(f"Site:       {site}")
-    #print(f"Diagnosis:  {'ASD' if label == 1 else 'TDC'}")
-    #print(f"X_time shape: {timeseries.shape}")   # should be (200, timepoints)    
 
     data = build_subject_graph(timeseries, label, site)
     graphs.append(data)
