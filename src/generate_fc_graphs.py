@@ -29,13 +29,3 @@ if __name__ == '__main__':
         fc_graph = FCGraphBuilder()
         adj = fc_graph.build_graph(X_time)
         fc_graph.save_graph(adj, f"fc_graphs/{sid}_fc_graph.npy")
-
-        """
-        plt.figure(figsize=(8, 8))
-        plt.imshow(adj, cmap='coolwarm', vmin=-1, vmax=1)
-        plt.colorbar(label='Correlation')
-        plt.title(f"{sid} Functional Connectivity Matrix")
-        plt.xlabel("ROI")
-        plt.ylabel("ROI")
-        plt.show()
-        """
