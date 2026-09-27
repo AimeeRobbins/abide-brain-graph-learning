@@ -19,7 +19,7 @@ if __name__ == '__main__':
         data_loader = AbideDataLoader(data_dir=data_dir, pheno_df=pheno_df)
 
         # Load a single subject
-        X_time, y, site, sid = data_loader.load_subject(file.name)
+        X_time, y, site, sid, _, _ = data_loader.load_subject(file.name)
 
         print(f"Subject:    {sid}")
         print(f"Site:       {site}")

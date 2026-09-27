@@ -10,7 +10,7 @@ data_dir = '../abide_data/Outputs/cpac/filt_global/rois_cc200'
 data_loader = AbideDataLoader(data_dir=data_dir, pheno_df=pheno_df)
 
 # Load a single subject
-X_time, y, site, sid = data_loader.load_subject('Caltech_0051456_rois_cc200.1D')
+X_time, y, site, sid, _, _ = data_loader.load_subject('Caltech_0051456_rois_cc200.1D')
 
 print(f"Subject:    {sid}")
 print(f"Site:       {site}")

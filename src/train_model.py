@@ -69,7 +69,7 @@ class Trainer:
 
     def train(self, model, train_loader, val_loader, tag):
         criterion = torch.nn.CrossEntropyLoss()
-        optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+        optimizer = torch.optim.Adam(model.parameters(), lr=0.001) # could add weight decay: weight_decay=0.01
 
         best_val_f1 = -1.0
         best_epoch = 0
