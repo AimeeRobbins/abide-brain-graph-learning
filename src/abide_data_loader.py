@@ -49,5 +49,7 @@ class AbideDataLoader:
         
         site = row['SITE_ID'].values[0]
         id = row['SUB_ID'].values[0]
-        
-        return X_time, y, site, id
+        sex = row['SEX'].values[0]
+        age = row['AGE_AT_SCAN'].values[0]
+
+        return X_time, y, site, id, sex, age

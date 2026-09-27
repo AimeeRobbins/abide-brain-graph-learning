@@ -12,7 +12,7 @@ records = []
 
 for path in os.listdir(data_dir):
     try:
-        timeseries, label, site, sid = data_loader.load_subject(path)
+        timeseries, label, site, sid, _, _= data_loader.load_subject(path)
         stds = timeseries.std(axis=1)
         flat_rois = np.where(stds == 0)[0]
         records.append({

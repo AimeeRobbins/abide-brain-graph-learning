@@ -73,19 +73,12 @@ class FCGraphBuilder:
 
     def build_graph(self, x_time):
         """
-        Parameters
-        ----------
-        X_time : np.ndarray, shape (200, timepoints)
-            ROI time series matrix
+        INPUT
+        X_time : np.ndarray, shape (200, timepoints). ROI time series matrix
         
-        Returns
-        -------
-        A : np.ndarray, shape (200, 200)
-            Adjacency matrix
-        F : np.ndarray, shape (200, 200)
-            Correlation matrix (full, before sparsification)
-        stats_dict : dict
-            
+        RETURN
+        adj : np.ndarray, shape (200, 200). Adjacency matrix
+        stats_dict : dictionary for graph stats and features
         """
         # Compute Pearson Correlation Matrix with shape (200,200)
         fc = self.compute_fc(x_time)

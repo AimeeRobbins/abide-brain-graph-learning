@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 A = np.load("ec_graphs/50555_ec_graph.npy")
 
@@ -14,9 +15,6 @@ data = np.loadtxt("abide_data/outputs/cpac/filt_global/rois_cc200/Yale_0050626_r
 print(data)
 print("Number of zeros:", np.sum(data == 0))
 roi = 0
-
-import numpy as np
-import matplotlib.pyplot as plt
 
 zero_mask = (data == 0)
 

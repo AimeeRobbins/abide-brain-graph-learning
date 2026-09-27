@@ -49,7 +49,7 @@ data_loader = AbideDataLoader(data_dir=data_dir, pheno_df=pheno_df)
 
 # Load several subjects
 for path in os.listdir(data_dir):
-    timeseries, label, site, sid = data_loader.load_subject(path)
+    timeseries, label, site, sid, _, _ = data_loader.load_subject(path)
 
     data = build_subject_graph(timeseries, label, site)
     graphs.append(data)
