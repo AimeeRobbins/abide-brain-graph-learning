@@ -2,6 +2,8 @@ from torch_geometric.loader import DataLoader
 import os
 import torch
 import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
 from sklearn.metrics import (
     accuracy_score,
     balanced_accuracy_score,
@@ -14,6 +16,7 @@ from sklearn.metrics import (
 
 from splits import DataSplitter
 from GCN import GCN
+from GCN1 import GCN1
 
 class Trainer:
     """
@@ -29,7 +32,7 @@ class Trainer:
         if held_out_site is None:
             train_g, val_g, test_g = splitter.create_random_split(graphs)
         else:
-            train_g, val_g, test_g = splitter.create_loso_split(graphs, held_out_site)
+            train_g, val_g, test_g = splitter.create_loso_split(in_graphs=graphs, held_out_site=held_out_site)
 
         # Create data loaders
         train_loader = DataLoader(train_g, batch_size=4, shuffle=True)
@@ -69,9 +72,9 @@ class Trainer:
 
     def train(self, model, train_loader, val_loader, tag):
         criterion = torch.nn.CrossEntropyLoss()
-        optimizer = torch.optim.Adam(model.parameters(), lr=0.001) # could add weight decay: weight_decay=0.01
+        optimizer = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=0.001) # could add weight decay: weight_decay=0.01
 
-        best_val_f1 = -1.0
+        best_val_auc = -1.0
         best_epoch = 0
         patience = 15
         epochs_without_improvement = 0
@@ -80,7 +83,6 @@ class Trainer:
         # Training
         for epoch in range(100):
             model.train()
-
             epoch_loss = 0.0
 
             for batch in train_loader:
@@ -94,12 +96,20 @@ class Trainer:
                 epoch_loss += loss.item()
 
             average_loss = epoch_loss / len(train_loader)
-
             metrics, confusion_matrix = self.evaluate(model, val_loader)
 
-            # Save the best model based on f1 score
-            if metrics["f1"] > best_val_f1:
-                best_val_f1 = metrics["f1"]
+            history.append({
+                "epoch": epoch + 1,
+                "train_loss": average_loss,
+                "val_auc": metrics["auc"],
+                "val_f1": metrics["f1"],
+            })
+
+            min_epochs_before_saving = 5
+
+            # Save the best model based on auc score
+            if epoch >= min_epochs_before_saving and metrics["auc"] > best_val_auc:
+                best_val_auc = metrics["auc"]
                 best_epoch = epoch
 
                 torch.save(model.state_dict(), f"../models/best_gcn_{tag}.pt")
@@ -107,29 +117,16 @@ class Trainer:
             else:
                 epochs_without_improvement += 1
 
-            print(
-                f"Epoch {epoch + 1}: "
-                f"Loss={average_loss:.4f}, "
-                f"Accuracy: {metrics['accuracy']:.4f}, "
-                f"Precision: {metrics['precision']:.4f}, "
-                f"Recall: {metrics['recall']:.4f}, "
-                f"F1 Score: {metrics['f1']:.4f}, "
-                f"AUC: {metrics['auc']:.4f}"
-            )
-
-            print("Confusion Matrix:")
-            print(confusion_matrix)
-
             # Early stopping check
             if epochs_without_improvement >= patience:
-                print(f"Early stopping at epoch {epoch + 1}. Best validation f1: {best_val_f1:.4f}")
+                print(f"Early stopping at epoch {epoch + 1}. Best validation auc: {best_val_auc:.4f}")
                 break
 
-        return best_epoch + 1, best_val_f1
+        return best_epoch + 1, best_val_auc, history
 
-    def test(self, model, test_loader, best_epoch, best_val_f1, tag):
+    def test(self, model, test_loader, best_epoch, best_val_auc, tag):
         # Load best model
-        model.load_state_dict(torch.load("../models/best_gcn.pt"))
+        model.load_state_dict(torch.load(f"../models/best_gcn_{tag}.pt"))
         model.eval()
 
         correct = 0
@@ -157,7 +154,7 @@ class Trainer:
                 "tag": tag,
                 "n_test": int(confusion_matrix.sum()),
                 "best epoch": best_epoch,
-                "best_val_f1": best_val_f1,
+                "best_val_auc": best_val_auc,
                 "test_accuracy": metrics['accuracy'],
                 "test_balanced_accuracy": metrics['balanced_accuracy'],
                 "test_precision": metrics['precision'],
@@ -167,11 +164,52 @@ class Trainer:
                 "tn": tn, "fp": fp, "fn": fn, "tp": tp,
         }   
 
-    def run(self, held_out_site=None):
-        tag = held_out_site or "random"
+    def plot_history(self, history, tag):
+        epochs = [h["epoch"] for h in history]
+        losses = [h["train_loss"] for h in history]
+        aucs = [h["val_auc"] for h in history]
+
+        fig, ax1 = plt.subplots()
+        ax1.plot(epochs, losses, color="tab:red", label="train loss")
+        ax1.set_xlabel("epoch")
+        ax1.set_ylabel("loss", color="tab:red")
+
+        ax2 = ax1.twinx()
+        ax2.plot(epochs, aucs, color="tab:blue", label="val AUC")
+        ax2.set_ylabel("val AUC", color="tab:blue")
+
+        plt.title(f"Training curve: {tag}")
+        plt.savefig(f"../results/loss_curve_{tag}.png")
+        plt.close()
+
+    def run(self, held_out_site=None, model_class=GCN, model_tag="gcn"):
+        tag = f"{held_out_site or 'random'}_{model_tag}"
 
         # Create model
-        model = GCN()
+        model = model_class()
         train_loader, val_loader, test_loader = self.split(held_out_site)
-        best_epoch, best_val_f1 = self.train(model, train_loader, val_loader, tag)
-        return self.test(model, test_loader, best_epoch, best_val_f1, tag)    
+        best_epoch, best_val_auc, history = self.train(model, train_loader, val_loader, tag)
+
+        #self.plot_history(history, tag)
+
+        return self.test(model, test_loader, best_epoch, best_val_auc, tag)    
+
+    def run_repeated_loso(self, sites, model_class, model_tag, n_repeats=5):
+        all_results = []
+
+        for seed in range(n_repeats):
+            torch.manual_seed(seed)
+            np.random.seed(seed)
+
+            for site in sites:
+                result = self.run(
+                    held_out_site=site,
+                    model_class=model_class,
+                    model_tag=f"{model_tag}_seed{seed}"
+                )
+                result["site"] = site
+                result["seed"] = seed
+                result["model"] = model_tag
+                all_results.append(result)
+
+        return all_results

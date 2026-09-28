@@ -47,6 +47,10 @@ class ECGraphBuilder:
 
         return ec
 
+    def get_node_features(self, x_time):
+        """Fast method to obtain just the raw EC graph, no sparsify/normalize/self-loop work."""
+        return self.compute_ec(x_time)
+
     def sparsify_ec(self, ec):
         """
         Sparsifies the graph to keep the top k strongest connections (measures absolute magnitude)

@@ -40,6 +40,34 @@ def build_subject_graph(roi_time_series, label, site):
 
     return data
 
+def build_subject_graph_swapped(roi_time_series, label, site):
+    """Returns a Object containg a tensor data object (edge_index, edge_weight, x, y) and site"""
+    # Obtain the adjacency matrix FC Graph and convert to tensor
+    fc, fc_stats = fc_builder.build_graph(roi_time_series)
+    A = torch.tensor(fc, dtype=torch.float)
+
+    # Represent A as edge_index and edge_weight
+    edge_index = torch.nonzero(A, as_tuple=False).t()
+    edge_weight = A[edge_index[0], edge_index[1]]
+
+    # Obtain the raw EC to use as the node features
+    ec_raw = ec_builder.get_node_features(roi_time_series)
+    x = torch.tensor(ec_raw, dtype=torch.float)
+
+    # diagnosis label, y
+    y = torch.tensor([label], dtype=torch.long)
+    
+    data = Data(
+        x=x,
+        edge_index=edge_index,
+        edge_weight=edge_weight,
+        y=y
+    )
+
+    data.site = site
+
+    return data
+
 # main program to create graphs
 graphs = []
 
@@ -51,7 +79,7 @@ data_loader = AbideDataLoader(data_dir=data_dir, pheno_df=pheno_df)
 for path in os.listdir(data_dir):
     timeseries, label, site, sid, _, _ = data_loader.load_subject(path)
 
-    data = build_subject_graph(timeseries, label, site)
+    data = build_subject_graph_swapped(timeseries, label, site)
     graphs.append(data)
 
 # Save
