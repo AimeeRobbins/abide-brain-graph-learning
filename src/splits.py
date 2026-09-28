@@ -1,6 +1,7 @@
 from sklearn.model_selection import train_test_split
 import torch
 from collections import Counter
+import copy
 
 class DataSplitter:
     """
@@ -29,8 +30,9 @@ class DataSplitter:
 
         return train_graphs, val_graphs, test_graphs
 
-    def create_loso_split(self, graphs, held_out_site, val_size=0.2, random_state=42):
+    def create_loso_split(self, in_graphs, held_out_site, val_size=0.2, random_state=42):
         """Split graphs into training, validation and test sets where the test set is an entire site."""
+        graphs = copy.deepcopy(in_graphs)
         test_graphs = []
         remaining = []
 
@@ -50,6 +52,27 @@ class DataSplitter:
             random_state=random_state,
             stratify=[graph.y.item() for graph in remaining]
         )
+
+        # Standardise Node features based on training set
+        # Combine all EC feature values from training graphs
+        train_x = torch.cat([graph.x for graph in train_graphs], dim=0)
+
+        # Calculate statistics from TRAINING DATA ONLY
+        mean = train_x.mean()
+        std = train_x.std()
+
+        # Avoid division by zero
+        std = torch.clamp(std, min=1e-8)
+
+        # Apply the same statistics to all splits
+        for graph in train_graphs:
+            graph.x = (graph.x - mean) / std
+
+        for graph in val_graphs:
+            graph.x = (graph.x - mean) / std
+
+        for graph in test_graphs:
+            graph.x = (graph.x - mean) / std
 
         return train_graphs, val_graphs, test_graphs
 

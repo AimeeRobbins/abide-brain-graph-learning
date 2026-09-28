@@ -4,16 +4,26 @@ from torch_geometric.nn import GCNConv
 from torch_geometric.nn import global_mean_pool
 
 
-class GCN(torch.nn.Module):
-    def __init__(self):
+class GCN1(torch.nn.Module):
+    """
+    Identity-aware GCN: adds a learned ROI embedding to each node's FC-row feature vector before the first conv layer
+    """
+    def __init__(self, num_rois=200, roi_embed_dim=16):
         super().__init__()
 
-        self.conv1 = GCNConv(200, 32, normalize=False)
+        self.num_rois = num_rois
+        self.roi_embedding = torch.nn.Embedding(num_rois, roi_embed_dim)
+
+        # First layer grows from
+        self.conv1 = GCNConv(200 + roi_embed_dim, 32, normalize=False)
         self.conv2 = GCNConv(32, 8, normalize=False)
 
         self.classifier = torch.nn.Linear(8, 2)
 
     def forward(self, x, edge_index, edge_weight, batch):
+        roi_ids = torch.arange(x.size(0), device=x.device) % self.num_rois
+        roi_embeds = self.roi_embedding(roi_ids)
+        x = torch.cat([x, roi_embeds], dim=-1)
 
         # First GCN layer
         x = self.conv1(x, edge_index, edge_weight)
