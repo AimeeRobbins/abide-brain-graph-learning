@@ -13,8 +13,7 @@ class GCN(torch.nn.Module):
 
         self.classifier = torch.nn.Linear(8, 2)
 
-    def forward(self, x, edge_index, edge_weight, batch):
-
+    def get_graph_embedding(self, x, edge_index, edge_weight, batch):
         # First GCN layer
         x = self.conv1(x, edge_index, edge_weight)
         x = F.relu(x)
@@ -27,8 +26,10 @@ class GCN(torch.nn.Module):
 
         # Turn node embeddings into graph embeddings
         x = global_mean_pool(x, batch)
+        return x
 
+    def forward(self, x, edge_index, edge_weight, batch):
+        x = self.get_graph_embedding(x, edge_index, edge_weight, batch)
         # ASD/control prediction
         x = self.classifier(x)
-
         return x

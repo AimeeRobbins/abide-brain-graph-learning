@@ -14,13 +14,11 @@ class GCN1(torch.nn.Module):
         self.num_rois = num_rois
         self.roi_embedding = torch.nn.Embedding(num_rois, roi_embed_dim)
 
-        # First layer grows from
         self.conv1 = GCNConv(200 + roi_embed_dim, 32, normalize=False)
         self.conv2 = GCNConv(32, 8, normalize=False)
-
         self.classifier = torch.nn.Linear(8, 2)
 
-    def forward(self, x, edge_index, edge_weight, batch):
+    def get_graph_embedding(self, x, edge_index, edge_weight, batch):
         roi_ids = torch.arange(x.size(0), device=x.device) % self.num_rois
         roi_embeds = self.roi_embedding(roi_ids)
         x = torch.cat([x, roi_embeds], dim=-1)
@@ -37,7 +35,10 @@ class GCN1(torch.nn.Module):
 
         # Turn node embeddings into graph embeddings
         x = global_mean_pool(x, batch)
+        return x
 
+    def forward(self, x, edge_index, edge_weight, batch):
+        x = self.get_graph_embedding(x, edge_index, edge_weight, batch)
         # ASD/control prediction
         x = self.classifier(x)
 

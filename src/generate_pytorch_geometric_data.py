@@ -51,8 +51,12 @@ def build_subject_graph_swapped(roi_time_series, label, site):
     edge_weight = A[edge_index[0], edge_index[1]]
 
     # Obtain the raw EC to use as the node features
-    ec_raw = ec_builder.get_node_features(roi_time_series)
-    x = torch.tensor(ec_raw, dtype=torch.float)
+    #ec_raw = ec_builder.get_node_features(roi_time_series)
+    #x = torch.tensor(ec_raw, dtype=torch.float)
+
+    # Obtain the raw FC to use as the node features
+    fc_raw = fc_builder.get_node_features(roi_time_series)
+    x = torch.tensor(fc_raw, dtype=torch.float)
 
     # diagnosis label, y
     y = torch.tensor([label], dtype=torch.long)
