@@ -236,3 +236,5 @@ download_abide_preproc_guide.txt
 Phenotypic_V1_0b_preprocessed1.csv
 flat_roi_diagnostic.csv
 /src/download_abide_preproc.py
+/src/test.py
+/src/flat_roi_diagnostic.csv
