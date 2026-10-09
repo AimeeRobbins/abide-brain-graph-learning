@@ -23,5 +23,5 @@ This code was developed for the experiments conducted in this research project. 
 ## Dependencies
 The implementation uses Python and libraries including PyTorch, PyTorch Geometric, NumPy, pandas, and scikit-learn.
 
-##A cknowledgements
+## Acknowledgements
 The ABIDE preprocessed data were obtained from the Preprocessed Connectomes Project http://preprocessed-connectomes-project.org/abide/. Please refer to the original project for dataset documentation and relevant acknowledgements.
