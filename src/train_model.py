@@ -274,7 +274,7 @@ class Trainer:
         train_loader, val_loader, test_loader = self.split(held_out_site)
         best_epoch, best_val_auc, history = self.train(model, train_loader, val_loader, tag)
 
-        #self.plot_history(history, tag)
+        self.plot_history(history, tag)
 
         return self.test(model, test_loader, best_epoch, best_val_auc, tag)    
 
@@ -284,7 +284,7 @@ class Trainer:
         train_loader, val_loader, test_loader = self.split(held_out_site, use_coral_sampler=True)
         best_epoch, best_val_auc, history = self.train_coral(model, train_loader, val_loader, tag, coral_weight=coral_weight)
 
-        #self.plot_history(history, tag)
+        self.plot_history(history, tag)
 
         return self.test(model, test_loader, best_epoch, best_val_auc, tag)
 
